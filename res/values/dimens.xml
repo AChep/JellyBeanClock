@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="widget_bitmapsize">220dip</dimen>
+    <dimen name="widget_circle_radius">105dip</dimen>
+    <dimen name="widget_hand_hour">50dip</dimen>
+    <dimen name="widget_hand_hour_over">12dip</dimen>
+    <dimen name="widget_hand_minute">95dip</dimen>
+    <dimen name="widget_hand_minute_over">12dip</dimen>
+    <dimen name="widget_stroke_width">6dip</dimen>
+    <dimen name="widget_shadow_radius">10dip</dimen>
+    <dimen name="widget_shadow_x">0dip</dimen>
+    <dimen name="widget_shadow_y">0dip</dimen>
+
+</resources>

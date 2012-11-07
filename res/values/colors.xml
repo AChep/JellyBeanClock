@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="widget_shadow_color">#1E000000</color>
+    <color name="widget_stroke_color">#fff</color>
+
+</resources>
