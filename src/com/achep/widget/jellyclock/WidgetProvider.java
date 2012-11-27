@@ -180,7 +180,6 @@ public class WidgetProvider extends AppWidgetProvider {
 			paint.setColor(r.getColor(R.color.widget_stroke_color));
 			paint.setShadowLayer(r.getDimension(R.dimen.widget_shadow_radius),
 					0, 0, r.getColor(R.color.widget_shadow_color));
-			paint.setStrokeWidth(r.getDimension(R.dimen.widget_stroke_width));
 
 			// Get current time
 			Time time = new Time();
@@ -191,8 +190,14 @@ public class WidgetProvider extends AppWidgetProvider {
 			// // DRAWING DRAWING DRAWING
 
 			// Draw clock circle
+			paint.setStrokeWidth(r
+					.getDimension(R.dimen.widget_circle_stroke_width));
 			canvas.drawCircle(center, center,
 					r.getDimension(R.dimen.widget_circle_radius), paint);
+
+			// Hands
+			paint.setStrokeWidth(r
+					.getDimension(R.dimen.widget_hands_stroke_width));
 
 			// Draw hour hand
 			canvas.save();
@@ -223,5 +228,6 @@ public class WidgetProvider extends AppWidgetProvider {
 			// CLEAN UP !!!
 			bitmap.recycle();
 		}
+
 	}
 }
