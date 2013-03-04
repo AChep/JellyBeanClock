@@ -67,11 +67,11 @@ public class WidgetProvider extends AppWidgetProvider {
 				String key = intent.getAction();
 				if (key.equals(Intent.ACTION_SCREEN_ON)) {
 					isScreenOn = true;
-					updateWidget(0);
+					updateWidget();
 				} else if (key.equals(Intent.ACTION_SCREEN_OFF)) {
 					isScreenOn = false;
 				} else if (isScreenOn) {
-					updateWidget(0);
+					updateWidget();
 				}
 			}
 
@@ -100,7 +100,7 @@ public class WidgetProvider extends AppWidgetProvider {
 		public void onStart(Intent intent, int startId) {
 
 			// Update all elements and set onclick intent
-			updateWidget(1);
+			updateWidget();
 		}
 
 		@Override
@@ -146,7 +146,7 @@ public class WidgetProvider extends AppWidgetProvider {
 			return (foundClockImpl) ? alarmClockIntent : null;
 		}
 
-		private void updateWidget(int mode) {
+		private void updateWidget() {
 			RemoteViews rv = new RemoteViews(getPackageName(),
 					R.layout.analog_appwidget);
 			Resources r = getResources();
@@ -155,10 +155,8 @@ public class WidgetProvider extends AppWidgetProvider {
 			// // ON CLICK ON CLICK ON CLICK
 			// // ON CLICK ON CLICK ON CLICK
 
-			if (mode == 1) {
-				rv.setOnClickPendingIntent(R.id.analog_appwidget,
-						PendingIntent.getActivity(this, 0, getAlarmIntent(), 0));
-			}
+			rv.setOnClickPendingIntent(R.id.analog_appwidget,
+					PendingIntent.getActivity(this, 0, getAlarmIntent(), 0));
 
 			// // PREPARING PREPARING PREPARING
 			// // PREPARING PREPARING PREPARING
