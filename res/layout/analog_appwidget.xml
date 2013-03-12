@@ -1,5 +1,5 @@
 <!--
-     Copyright (C) 2012 AChep@xda <artemchep@gmail.com>
+     Copyright (C) 2012-2013 AChep@xda <artemchep@gmail.com>
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,7 +14,9 @@
      limitations under the License.
 -->
 <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/analog_appwidget"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:src="@drawable/widget_loading_state" />
+    android:src="@drawable/widget_loading_state"
+    tools:ignore="contentDescription" />

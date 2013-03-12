@@ -42,17 +42,18 @@ import android.widget.RemoteViews;
  */
 public class WidgetProvider extends AppWidgetProvider {
 
+	private Intent mUpdateService;
+
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		if (intent.getAction().equals(
-				"android.appwidget.action.APPWIDGET_DISABLED")) {
-
-			// Stop update service
-			context.stopService(new Intent(context, UpdateService.class));
+				AppWidgetManager.ACTION_APPWIDGET_DISABLED)) {
+			context.stopService(mUpdateService);
 		} else {
+			if (mUpdateService == null)
+				mUpdateService = new Intent(context, UpdateService.class);
 
-			// Oh :')
-			context.startService(new Intent(context, UpdateService.class));
+			context.startService(mUpdateService);
 		}
 	}
 
@@ -77,8 +78,15 @@ public class WidgetProvider extends AppWidgetProvider {
 
 		};
 
+		private RemoteViews mRemoteViews;
+
 		@Override
 		public void onCreate() {
+			mRemoteViews = new RemoteViews(getPackageName(),
+					R.layout.analog_appwidget);
+			mRemoteViews.setOnClickPendingIntent(R.id.analog_appwidget,
+					PendingIntent.getActivity(this, 0, getAlarmIntent(), 0));
+
 			// Register time change / screen actions
 			IntentFilter filter = new IntentFilter();
 			filter.addAction(Intent.ACTION_SCREEN_ON);
@@ -91,15 +99,11 @@ public class WidgetProvider extends AppWidgetProvider {
 
 		@Override
 		public void onDestroy() {
-
-			// We're destroying :'(
 			unregisterReceiver(mReceiver);
 		}
 
 		@Override
 		public void onStart(Intent intent, int startId) {
-
-			// Update all elements and set onclick intent
 			updateWidget();
 		}
 
@@ -118,22 +122,20 @@ public class WidgetProvider extends AppWidgetProvider {
 			Intent alarmClockIntent = new Intent(Intent.ACTION_MAIN)
 					.addCategory(Intent.CATEGORY_LAUNCHER);
 			String clockImpls[][] = {
-					{ "HTC Alarm ClockDT", "com.htc.android.worldclock",
+					{ "com.htc.android.worldclock",
 							"com.htc.android.worldclock.WorldClockTabControl" },
-					{ "Standar Alarm ClockDT", "com.android.deskclock",
+					{ "com.android.deskclock",
 							"com.android.deskclock.AlarmClock" },
-					{ "Froyo Nexus Alarm ClockDT",
-							"com.google.android.deskclock",
+					{ "com.google.android.deskclock",
 							"com.android.deskclock.DeskClock" },
-					{ "Moto Blur Alarm ClockDT",
-							"com.motorola.blur.alarmclock",
+					{ "com.motorola.blur.alarmclock",
 							"com.motorola.blur.alarmclock.AlarmClock" },
-					{ "Samsung Galaxy S", "com.sec.android.app.clockpackage",
+					{ "com.sec.android.app.clockpackage",
 							"com.sec.android.app.clockpackage.ClockPackage" } };
 			boolean foundClockImpl = false;
 			for (int i = 0; i < clockImpls.length; i++) {
-				String packageName = clockImpls[i][1];
-				String className = clockImpls[i][2];
+				String packageName = clockImpls[i][0];
+				String className = clockImpls[i][1];
 				try {
 					ComponentName cn = new ComponentName(packageName, className);
 					packageManager.getActivityInfo(cn,
@@ -147,20 +149,7 @@ public class WidgetProvider extends AppWidgetProvider {
 		}
 
 		private void updateWidget() {
-			RemoteViews rv = new RemoteViews(getPackageName(),
-					R.layout.analog_appwidget);
 			Resources r = getResources();
-
-			// // ON CLICK ON CLICK ON CLICK
-			// // ON CLICK ON CLICK ON CLICK
-			// // ON CLICK ON CLICK ON CLICK
-
-			rv.setOnClickPendingIntent(R.id.analog_appwidget,
-					PendingIntent.getActivity(this, 0, getAlarmIntent(), 0));
-
-			// // PREPARING PREPARING PREPARING
-			// // PREPARING PREPARING PREPARING
-			// // PREPARING PREPARING PREPARING
 
 			// Create new bitmap and canvas
 			float bitmapSize = r.getDimension(R.dimen.widget_bitmapsize);
@@ -220,8 +209,8 @@ public class WidgetProvider extends AppWidgetProvider {
 			// // SET CHANGES SET CHANGES
 			// // SET CHANGES SET CHANGES
 
-			rv.setImageViewBitmap(R.id.analog_appwidget, bitmap);
-			save(rv);
+			mRemoteViews.setImageViewBitmap(R.id.analog_appwidget, bitmap);
+			save(mRemoteViews);
 
 			// CLEAN UP !!!
 			bitmap.recycle();

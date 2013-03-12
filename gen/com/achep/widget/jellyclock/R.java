@@ -17,14 +17,15 @@ public final class R {
     public static final class dimen {
         public static final int widget_bitmapsize=0x7f060000;
         public static final int widget_circle_radius=0x7f060001;
+        public static final int widget_circle_stroke_width=0x7f060006;
         public static final int widget_hand_hour=0x7f060002;
         public static final int widget_hand_hour_over=0x7f060003;
         public static final int widget_hand_minute=0x7f060004;
         public static final int widget_hand_minute_over=0x7f060005;
-        public static final int widget_shadow_radius=0x7f060007;
-        public static final int widget_shadow_x=0x7f060008;
-        public static final int widget_shadow_y=0x7f060009;
-        public static final int widget_stroke_width=0x7f060006;
+        public static final int widget_hands_stroke_width=0x7f060007;
+        public static final int widget_shadow_radius=0x7f060008;
+        public static final int widget_shadow_x=0x7f060009;
+        public static final int widget_shadow_y=0x7f06000a;
     }
     public static final class drawable {
         public static final int ic_launcher=0x7f020000;
