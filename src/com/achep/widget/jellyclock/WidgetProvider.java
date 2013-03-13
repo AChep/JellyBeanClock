@@ -27,14 +27,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PorterDuff.Mode;
 import android.os.IBinder;
 import android.text.format.Time;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 /**
@@ -79,15 +79,43 @@ public class WidgetProvider extends AppWidgetProvider {
 		};
 
 		private RemoteViews mRemoteViews;
+		private Bitmap mBitmap;
+		private Canvas mCanvas;
+		private Paint mPaint;
+
+		private float mPropBitmapSize;
+		private float mPropShadowRadius;
+		private float mPropCircleStrokeWidth;
+		private float mPropCircleRadius;
+		private float mPropHandsStrokeWidth;
+		private float mPropHandHourHeight;
+		private float mPropHandHourHeightOver;
+		private float mPropHandMinuteHeight;
+		private float mPropHandMinuteHeightOver;
+		private int mPropStrokeColor;
+		private int mPropShadowColor;
 
 		@Override
 		public void onCreate() {
 			mRemoteViews = new RemoteViews(getPackageName(),
 					R.layout.analog_appwidget);
-			mRemoteViews.setOnClickPendingIntent(R.id.analog_appwidget,
-					PendingIntent.getActivity(this, 0, getAlarmIntent(), 0));
+			mRemoteViews.setOnClickPendingIntent(
+					R.id.analog_appwidget,
+					PendingIntent.getActivity(this, 0,
+							Utils.getAlarmIntent(this), 0));
 
-			// Register time change / screen actions
+			loadProps();
+
+			mBitmap = Bitmap.createBitmap(Math.round(mPropBitmapSize),
+					Math.round(mPropBitmapSize), Bitmap.Config.ARGB_8888);
+			mCanvas = new Canvas(mBitmap);
+
+			mPaint = new Paint();
+			mPaint.setAntiAlias(true);
+			mPaint.setStyle(Paint.Style.STROKE);
+			mPaint.setColor(mPropStrokeColor);
+			mPaint.setShadowLayer(mPropShadowRadius, 0, 0, mPropShadowColor);
+
 			IntentFilter filter = new IntentFilter();
 			filter.addAction(Intent.ACTION_SCREEN_ON);
 			filter.addAction(Intent.ACTION_SCREEN_OFF);
@@ -107,113 +135,75 @@ public class WidgetProvider extends AppWidgetProvider {
 			updateWidget();
 		}
 
-		@Override
-		public IBinder onBind(Intent arg0) {
-			return null;
-		}
+		private void loadProps() {
+			Resources r = getResources();
 
-		private void save(RemoteViews rv) {
-			AppWidgetManager.getInstance(this).updateAppWidget(
-					new ComponentName(this, WidgetProvider.class), rv);
-		}
+			mPropBitmapSize = r.getDimension(R.dimen.widget_bitmapsize);
+			mPropShadowRadius = r.getDimension(R.dimen.widget_shadow_radius);
 
-		private Intent getAlarmIntent() {
-			PackageManager packageManager = getPackageManager();
-			Intent alarmClockIntent = new Intent(Intent.ACTION_MAIN)
-					.addCategory(Intent.CATEGORY_LAUNCHER);
-			String clockImpls[][] = {
-					{ "com.htc.android.worldclock",
-							"com.htc.android.worldclock.WorldClockTabControl" },
-					{ "com.android.deskclock",
-							"com.android.deskclock.AlarmClock" },
-					{ "com.google.android.deskclock",
-							"com.android.deskclock.DeskClock" },
-					{ "com.motorola.blur.alarmclock",
-							"com.motorola.blur.alarmclock.AlarmClock" },
-					{ "com.sec.android.app.clockpackage",
-							"com.sec.android.app.clockpackage.ClockPackage" } };
-			boolean foundClockImpl = false;
-			for (int i = 0; i < clockImpls.length; i++) {
-				String packageName = clockImpls[i][0];
-				String className = clockImpls[i][1];
-				try {
-					ComponentName cn = new ComponentName(packageName, className);
-					packageManager.getActivityInfo(cn,
-							PackageManager.GET_META_DATA);
-					alarmClockIntent.setComponent(cn);
-					foundClockImpl = true;
-				} catch (NameNotFoundException nf) {
-				}
-			}
-			return (foundClockImpl) ? alarmClockIntent : null;
+			// Circle
+			mPropCircleStrokeWidth = r
+					.getDimension(R.dimen.widget_circle_stroke_width);
+			mPropCircleRadius = r.getDimension(R.dimen.widget_circle_radius);
+
+			// Hands
+			mPropHandsStrokeWidth = r
+					.getDimension(R.dimen.widget_hands_stroke_width);
+
+			// Hour
+			mPropHandHourHeight = r.getDimension(R.dimen.widget_hand_hour);
+			mPropHandHourHeightOver = r
+					.getDimension(R.dimen.widget_hand_hour_over);
+
+			// Minute
+			mPropHandMinuteHeight = r.getDimension(R.dimen.widget_hand_minute);
+			mPropHandMinuteHeightOver = r
+					.getDimension(R.dimen.widget_hand_minute_over);
+
+			// Colors
+			mPropShadowColor = r.getColor(R.color.widget_shadow_color);
+			mPropStrokeColor = r.getColor(R.color.widget_stroke_color);
 		}
 
 		private void updateWidget() {
-			Resources r = getResources();
-
-			// Create new bitmap and canvas
-			float bitmapSize = r.getDimension(R.dimen.widget_bitmapsize);
-			Bitmap bitmap = Bitmap.createBitmap(Math.round(bitmapSize),
-					Math.round(bitmapSize), Bitmap.Config.ARGB_8888);
-			Canvas canvas = new Canvas(bitmap);
-
-			// X/Y of center
-			float center = bitmapSize / 2;
-
-			// Init paint with our settings
-			Paint paint = new Paint();
-			paint.setAntiAlias(true);
-			paint.setStyle(Paint.Style.STROKE);
-			paint.setColor(r.getColor(R.color.widget_stroke_color));
-			paint.setShadowLayer(r.getDimension(R.dimen.widget_shadow_radius),
-					0, 0, r.getColor(R.color.widget_shadow_color));
-
-			// Get current time
+			float center = mPropBitmapSize / 2;
 			Time time = new Time();
 			time.setToNow();
 
-			// // DRAWING DRAWING DRAWING
-			// // DRAWING DRAWING DRAWING
-			// // DRAWING DRAWING DRAWING
+			mCanvas.drawColor(0, Mode.CLEAR);
 
 			// Draw clock circle
-			paint.setStrokeWidth(r
-					.getDimension(R.dimen.widget_circle_stroke_width));
-			canvas.drawCircle(center, center,
-					r.getDimension(R.dimen.widget_circle_radius), paint);
+			mPaint.setStrokeWidth(mPropCircleStrokeWidth);
+			mCanvas.drawCircle(center, center, mPropCircleRadius, mPaint);
 
 			// Hands
-			paint.setStrokeWidth(r
-					.getDimension(R.dimen.widget_hands_stroke_width));
+			mPaint.setStrokeWidth(mPropHandsStrokeWidth);
 
 			// Draw hour hand
-			canvas.save();
-			canvas.rotate(time.hour * 30 + time.minute / 2, center, center);
-			canvas.drawLine(center,
-					center - r.getDimension(R.dimen.widget_hand_hour), center,
-					center + r.getDimension(R.dimen.widget_hand_hour_over),
-					paint);
-			canvas.restore();
+			mCanvas.save();
+			mCanvas.rotate(time.hour * 30 + time.minute / 2, center, center);
+			mCanvas.drawLine(center, center - mPropHandHourHeight, center,
+					center + mPropHandHourHeightOver, mPaint);
+			mCanvas.restore();
 
 			// Draw minute hand
-			canvas.save();
-			canvas.rotate(time.minute * 6, center, center);
-			canvas.drawLine(center,
-					center - r.getDimension(R.dimen.widget_hand_minute),
-					center,
-					center + r.getDimension(R.dimen.widget_hand_minute_over),
-					paint);
-			canvas.restore();
+			mCanvas.save();
+			mCanvas.rotate(time.minute * 6, center, center);
+			mCanvas.drawLine(center, center - mPropHandMinuteHeight, center,
+					center + mPropHandMinuteHeightOver, mPaint);
+			mCanvas.restore();
 
-			// // SET CHANGES SET CHANGES
-			// // SET CHANGES SET CHANGES
-			// // SET CHANGES SET CHANGES
+			// Apply changes
+			mRemoteViews.setImageViewBitmap(R.id.analog_appwidget, mBitmap);
+			AppWidgetManager.getInstance(this)
+					.updateAppWidget(
+							new ComponentName(this, WidgetProvider.class),
+							mRemoteViews);
+		}
 
-			mRemoteViews.setImageViewBitmap(R.id.analog_appwidget, bitmap);
-			save(mRemoteViews);
-
-			// CLEAN UP !!!
-			bitmap.recycle();
+		@Override
+		public IBinder onBind(Intent arg0) {
+			return null;
 		}
 
 	}
