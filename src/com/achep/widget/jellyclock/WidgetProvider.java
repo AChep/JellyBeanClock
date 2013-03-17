@@ -27,14 +27,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PorterDuff.Mode;
 import android.os.IBinder;
-import android.text.format.Time;
-import android.util.Log;
 import android.widget.RemoteViews;
 
 /**
@@ -79,21 +72,7 @@ public class WidgetProvider extends AppWidgetProvider {
 		};
 
 		private RemoteViews mRemoteViews;
-		private Bitmap mBitmap;
-		private Canvas mCanvas;
-		private Paint mPaint;
-
-		private float mPropBitmapSize;
-		private float mPropShadowRadius;
-		private float mPropCircleStrokeWidth;
-		private float mPropCircleRadius;
-		private float mPropHandsStrokeWidth;
-		private float mPropHandHourHeight;
-		private float mPropHandHourHeightOver;
-		private float mPropHandMinuteHeight;
-		private float mPropHandMinuteHeightOver;
-		private int mPropStrokeColor;
-		private int mPropShadowColor;
+		private AnalogClock mAnalogClock;
 
 		@Override
 		public void onCreate() {
@@ -104,17 +83,7 @@ public class WidgetProvider extends AppWidgetProvider {
 					PendingIntent.getActivity(this, 0,
 							Utils.getAlarmIntent(this), 0));
 
-			loadProps();
-
-			mBitmap = Bitmap.createBitmap(Math.round(mPropBitmapSize),
-					Math.round(mPropBitmapSize), Bitmap.Config.ARGB_8888);
-			mCanvas = new Canvas(mBitmap);
-
-			mPaint = new Paint();
-			mPaint.setAntiAlias(true);
-			mPaint.setStyle(Paint.Style.STROKE);
-			mPaint.setColor(mPropStrokeColor);
-			mPaint.setShadowLayer(mPropShadowRadius, 0, 0, mPropShadowColor);
+			mAnalogClock = new AnalogClock(getResources());
 
 			IntentFilter filter = new IntentFilter();
 			filter.addAction(Intent.ACTION_SCREEN_ON);
@@ -135,66 +104,9 @@ public class WidgetProvider extends AppWidgetProvider {
 			updateWidget();
 		}
 
-		private void loadProps() {
-			Resources r = getResources();
-
-			mPropBitmapSize = r.getDimension(R.dimen.widget_bitmapsize);
-			mPropShadowRadius = r.getDimension(R.dimen.widget_shadow_radius);
-
-			// Circle
-			mPropCircleStrokeWidth = r
-					.getDimension(R.dimen.widget_circle_stroke_width);
-			mPropCircleRadius = r.getDimension(R.dimen.widget_circle_radius);
-
-			// Hands
-			mPropHandsStrokeWidth = r
-					.getDimension(R.dimen.widget_hands_stroke_width);
-
-			// Hour
-			mPropHandHourHeight = r.getDimension(R.dimen.widget_hand_hour);
-			mPropHandHourHeightOver = r
-					.getDimension(R.dimen.widget_hand_hour_over);
-
-			// Minute
-			mPropHandMinuteHeight = r.getDimension(R.dimen.widget_hand_minute);
-			mPropHandMinuteHeightOver = r
-					.getDimension(R.dimen.widget_hand_minute_over);
-
-			// Colors
-			mPropShadowColor = r.getColor(R.color.widget_shadow_color);
-			mPropStrokeColor = r.getColor(R.color.widget_stroke_color);
-		}
-
 		private void updateWidget() {
-			float center = mPropBitmapSize / 2;
-			Time time = new Time();
-			time.setToNow();
-
-			mCanvas.drawColor(0, Mode.CLEAR);
-
-			// Draw clock circle
-			mPaint.setStrokeWidth(mPropCircleStrokeWidth);
-			mCanvas.drawCircle(center, center, mPropCircleRadius, mPaint);
-
-			// Hands
-			mPaint.setStrokeWidth(mPropHandsStrokeWidth);
-
-			// Draw hour hand
-			mCanvas.save();
-			mCanvas.rotate(time.hour * 30 + time.minute / 2, center, center);
-			mCanvas.drawLine(center, center - mPropHandHourHeight, center,
-					center + mPropHandHourHeightOver, mPaint);
-			mCanvas.restore();
-
-			// Draw minute hand
-			mCanvas.save();
-			mCanvas.rotate(time.minute * 6, center, center);
-			mCanvas.drawLine(center, center - mPropHandMinuteHeight, center,
-					center + mPropHandMinuteHeightOver, mPaint);
-			mCanvas.restore();
-
-			// Apply changes
-			mRemoteViews.setImageViewBitmap(R.id.analog_appwidget, mBitmap);
+			mRemoteViews.setImageViewBitmap(R.id.analog_appwidget,
+					mAnalogClock.draw());
 			AppWidgetManager.getInstance(this)
 					.updateAppWidget(
 							new ComponentName(this, WidgetProvider.class),

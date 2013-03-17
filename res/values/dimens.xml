@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <dimen name="widget_bitmapsize">220dip</dimen>
-    <dimen name="widget_circle_radius">105dip</dimen>
-    <dimen name="widget_hand_hour">50dip</dimen>
-    <dimen name="widget_hand_hour_over">12dip</dimen>
-    <dimen name="widget_hand_minute">93dip</dimen>
-    <dimen name="widget_hand_minute_over">12dip</dimen>
-    <dimen name="widget_circle_stroke_width">5dip</dimen>
-    <dimen name="widget_hands_stroke_width">4dip</dimen>
-    <dimen name="widget_shadow_radius">10dip</dimen>
-    <dimen name="widget_shadow_x">0dip</dimen>
-    <dimen name="widget_shadow_y">0dip</dimen>
+    <dimen name="widget_analog_size">220dip</dimen>
+    
+    <dimen name="widget_analog_shadow_radius">10dip</dimen>
+    <dimen name="widget_analog_border_radius">105dip</dimen>
+    <dimen name="widget_analog_border_width">5dip</dimen>
+    
+    <dimen name="widget_analog_hour_height">50dip</dimen>
+    <dimen name="widget_analog_hour_height_negative">@dimen/widget_analog_hands_height_negative</dimen>
+    <dimen name="widget_analog_minute_height">93dip</dimen>
+    <dimen name="widget_analog_minute_height_negative">@dimen/widget_analog_hands_height_negative</dimen>
+    
+    <dimen name="widget_analog_hands_width">4dip</dimen>
+    <dimen name="widget_analog_hands_height_negative">12dip</dimen>
 
 </resources>
