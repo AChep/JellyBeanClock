@@ -40,12 +40,12 @@ public class WidgetProvider extends AppWidgetProvider {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		if (intent.getAction().equals(
-				AppWidgetManager.ACTION_APPWIDGET_DISABLED)) {
-			context.stopService(mUpdateService);
+			AppWidgetManager.ACTION_APPWIDGET_DISABLED)) {
+				mUpdateService = new Intent(); //ensure this isn't null to prevent NPE
+				context.stopService(mUpdateService);
 		} else {
 			if (mUpdateService == null)
 				mUpdateService = new Intent(context, UpdateService.class);
-
 			context.startService(mUpdateService);
 		}
 	}
